@@ -1,0 +1,15 @@
+{
+  "version": "candidate-net-assistance-fixed-v2",
+  "window_seconds": 0.8,
+  "net_top_fraction": 0.15,
+  "ball_mask_scale": 1.2,
+  "min_points": 6,
+  "max_forward_backward_pixels": 1.5,
+  "noise_mad_multiplier": 2.0,
+  "minimum_displacement_hoop_widths": 0.02,
+  "minimum_consecutive_frames": 3,
+  "pre_end_seconds": -0.2,
+  "post_start_seconds": -0.1,
+  "lk_window": 11,
+  "lk_levels": 2
+}

@@ -1,0 +1,16 @@
+{
+  "version": "minor-camera-shake-v2",
+  "tracking_width": 640,
+  "background_top_fraction": 0.45,
+  "background_horizontal_fraction": 0.6,
+  "max_corners": 400,
+  "minimum_inliers": 20,
+  "minimum_inlier_fraction": 0.6,
+  "minimum_span_x_fraction": 0.2,
+  "minimum_span_y_fraction": 0.05,
+  "maximum_forward_backward_pixels": 1.0,
+  "ransac_pixels": 1.5,
+  "maximum_translation_fraction": 0.03,
+  "maximum_rotation_degrees": 2.0,
+  "maximum_scale_change": 0.03
+}

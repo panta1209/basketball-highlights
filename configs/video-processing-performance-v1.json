@@ -1,0 +1,10 @@
+{
+  "version": "video-processing-performance-v1",
+  "container": "avi",
+  "codec": "libx264rgb",
+  "preset": "ultrafast",
+  "crf": 0,
+  "keyframe_interval": 1,
+  "encoder_threads": 4,
+  "mapping_pixel_samples": 5
+}

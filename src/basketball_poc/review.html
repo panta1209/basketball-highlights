@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>篮球候选片段确认</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f5f4;color:#182824;font:16px/1.6 system-ui,sans-serif}header,main{max-width:1160px;margin:auto;padding:24px}h1{font-size:28px;margin:0 0 8px}p{margin:8px 0;color:#52615c}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0}button{border:1px solid #acb8b1;background:white;border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer}button.primary{background:#185d45;color:white;border-color:#185d45}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible{outline:3px solid #c89332;outline-offset:3px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}.card{background:white;border:1px solid #dbe2dd;border-radius:12px;overflow:hidden}.card-body{padding:16px}.card h2{font-size:18px;margin:0 0 6px}.state{font-size:14px;color:#6b6253}.state.keep{color:#185d45}.state.reject{color:#775650}video{display:block;width:100%;background:#111;aspect-ratio:16/9}.actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:14px 0 0}label{display:flex;gap:8px;align-items:center;cursor:pointer}input{width:20px;height:20px;accent-color:#185d45}.source{font-size:14px}footer{max-width:1160px;margin:auto;padding:16px 24px 40px;color:#52615c}#count{font-weight:600}noscript{display:block;padding:24px}@media(max-width:480px){header,main{padding:16px}.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>确认你的进球片段</h1><p>回看每段候选，勾选要保留的进球，或点击“不保留”。全部确认后保存结果。</p><p class="source" id="source"></p><div class="toolbar"><span id="count" aria-live="polite"></span><button class="primary" id="save" disabled>保存确认结果</button></div></header>
+<main><p id="coverage"></p><div id="export-status" role="status" aria-live="polite"></div><p><a id="montage" hidden download="basketball-highlights.mp4">下载集锦</a> <a id="selection" hidden download="candidate-selection.json">下载确认记录</a></p><div class="grid" id="cards"></div></main><footer>候选列表只包含系统找到的片段。系统漏掉的进球不会在此页出现。未找到候选不代表没有进球。</footer><noscript>请启用浏览器 JavaScript 后查看候选。</noscript>
+<script>
+const DATA=/*REVIEW_DATA*/null;
+const browserExport=DATA.manifest.browser_export_enabled===true;
+let exporting=false;
+if(browserExport){document.getElementById('save').textContent='生成集锦';document.querySelector('header p').textContent='回看每段候选，勾选要保留的进球，或点击“不保留”。全部确认后生成集锦。';}
+if(DATA.manifest.coverage){const fraction=DATA.manifest.coverage.available_fraction;document.getElementById('coverage').textContent=`约 ${Math.round(fraction*100)}% 的画面可定位篮筐。其余时段可能存在篮筐出画、遮挡或镜头变化，请留意遗漏。`;}
+const states=new Map(DATA.manifest.candidates.map(c=>[c.id,'pending']));
+const source=DATA.manifest.source.path.split(/[\\/]/).pop();document.getElementById('source').textContent=source;
+const format=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+function update(){const all=[...states.values()];const pending=all.filter(x=>x==='pending').length;const kept=all.filter(x=>x==='keep').length;document.getElementById('count').textContent=`已确认 ${all.length-pending} / ${all.length} · 已选 ${kept} 段`;document.getElementById('save').disabled=pending!==0||exporting;document.querySelectorAll('.actions input,.actions button').forEach(el=>el.disabled=exporting);}
+DATA.manifest.candidates.forEach((c,i)=>{
+ const card=document.createElement('article');card.className='card';
+ const video=document.createElement('video');video.src=c.clip;video.controls=true;video.preload='metadata';video.setAttribute('aria-label',`候选 ${i+1} 视频`);video.addEventListener('play',()=>document.querySelectorAll('video').forEach(v=>{if(v!==video)v.pause()}));card.append(video);
+ const body=document.createElement('div');body.className='card-body';const title=document.createElement('h2');title.textContent=`候选 ${i+1} · ${format(c.time_seconds)}`;body.append(title);
+ const status=document.createElement('div');status.className='state';status.textContent='待确认';body.append(status);
+ const seek=document.createElement('button');seek.textContent='跳到候选时刻';seek.addEventListener('click',()=>{video.currentTime=c.time_seconds-c.clip_start_seconds});body.append(seek);
+ const actions=document.createElement('div');actions.className='actions';const label=document.createElement('label');const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.setAttribute('aria-label',`候选 ${i+1} 选入集锦`);label.append(checkbox,document.createTextNode('这是进球，选入集锦'));actions.append(label);
+ const reject=document.createElement('button');reject.textContent='不保留';reject.setAttribute('aria-label',`候选 ${i+1} 不保留`);actions.append(reject);
+ function decide(keep){states.set(c.id,keep?'keep':'reject');checkbox.checked=keep;status.textContent=keep?'已选入':'已排除';status.className=`state ${keep?'keep':'reject'}`;if(browserExport){document.getElementById('montage').hidden=true;document.getElementById('selection').hidden=true;document.getElementById('export-status').textContent='选择已更改，请生成集锦保存本次结果。';}update()}
+ checkbox.addEventListener('change',()=>decide(checkbox.checked));reject.addEventListener('click',()=>decide(false));body.append(actions);card.append(body);document.getElementById('cards').append(card);
+});
+function showExport(result){
+ exporting=result.status==='running';update();
+ const status=document.getElementById('export-status');
+ document.getElementById('montage').hidden=true;document.getElementById('selection').hidden=true;
+ if(exporting)status.textContent='正在生成集锦，请稍候…';
+ else if(result.status==='failed')status.textContent='生成失败，可以重试。'+(result.error||'');
+ else if(result.status==='completed'){
+  status.textContent=result.selected_count?`已生成 ${result.selected_count} 段集锦。`:'没有选择片段，已保存确认记录。';
+  if(result.selection_actor==='integration_test')status.textContent+=' 本次为模拟流程验证。';
+  if(result.montage_url){const link=document.getElementById('montage');link.href=result.montage_url;link.hidden=false;}
+  const link=document.getElementById('selection');link.href=result.selection_url;link.hidden=false;
+ }
+}
+async function pollExport(){
+ try{const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw new Error('无法读取导出状态');const result=await response.json();showExport(result);if(result.status==='running')setTimeout(pollExport,700);}
+ catch(error){exporting=false;update();document.getElementById('export-status').textContent='无法连接本地服务，请刷新页面检查导出结果。';}
+}
+document.getElementById('save').addEventListener('click',async()=>{
+ if([...states.values()].includes('pending'))return;
+ const selection={version:'candidate-selection-v1',review_manifest_sha256:DATA.manifest_sha256,complete:true,reviewed_ids:[...states.keys()],selected_ids:[...states].filter(([id,state])=>state==='keep').map(([id])=>id)};
+ if(browserExport){
+  showExport({status:'running'});
+  try{const response=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(selection)});const result=await response.json();if(!response.ok){if(response.status===409){pollExport();return;}throw new Error(result.error||'无法开始导出');}showExport(result);pollExport();}
+  catch(error){showExport({status:'failed',error:error.message});}
+  return;
+ }
+ const url=URL.createObjectURL(new Blob([JSON.stringify(selection,null,2)+'\n'],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='candidate-selection.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});update();if(browserExport)pollExport();
+</script></body></html>

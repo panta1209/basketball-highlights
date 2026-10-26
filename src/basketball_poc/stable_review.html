@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>篮球集锦 · 确认与导出</title>
+<style>
+#manual-goals{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+dialog{width:min(900px,95vw);max-height:95vh;overflow:auto;border:1px solid #a9b8ad;border-radius:12px;color:#1c3028}dialog::backdrop{background:#10271dcc}.edit-fields{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.edit-fields label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}.edit-fields input{width:100%;padding:8px;font:inherit}#edit-error{color:#9b3426}
+[hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:#f4f5f1;color:#1c3028;font:16px/1.6 system-ui,sans-serif}header,main,footer{max-width:1180px;margin:auto;padding:24px}header{padding-top:36px}h1{font-size:30px;margin:0}h2{font-size:22px}p{color:#52635a;margin:8px 0}.bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#fff;padding:18px;border-radius:12px;margin-top:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.card{background:#fff;border:1px solid #d7dfd8;border-radius:12px;overflow:hidden}.body{padding:16px}.card h3{font-size:18px;margin:0 0 6px}video{width:100%;display:block;background:#101713;aspect-ratio:16/9}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button,a.download{border:1px solid #a9b8ad;border-radius:7px;padding:9px 14px;background:white;color:#234d36;font:inherit;cursor:pointer}button.primary{background:#205c3e;color:white;border-color:#205c3e}button:disabled{opacity:.4;cursor:default}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #cb922d;outline-offset:3px}button.active{box-shadow:inset 0 0 0 2px #205c3e}.status{font-size:14px;color:#5c6e61;min-height:24px}details{margin:28px 0}summary{cursor:pointer;font-weight:600;margin-bottom:16px}.result{margin:16px 0}a{color:#205c3e}.links{display:flex;gap:16px;flex-wrap:wrap}footer{font-size:14px;color:#52635a}#storage{color:#995224}#counter{font-weight:600}.empty{padding:12px;background:#e8eee8;border-radius:8px}@media(max-width:500px){header,main,footer{padding:16px}.grid{grid-template-columns:1fr}}
+.player-controls{padding:10px 12px;background:#edf2ed}.player-controls .row{display:flex;align-items:center;gap:10px}.player-controls input{width:100%;accent-color:#205c3e;min-width:60px}.player-controls button{padding:6px 10px;white-space:nowrap}.player-time{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}.segment-note{font-size:13px;padding:0 12px 8px;background:#edf2ed;margin:0}.playback-error{color:#9b3426}
+.player-controls .secondary{flex-wrap:wrap}.segment-player:fullscreen{width:100%;height:100%;display:flex;flex-direction:column;background:#101713;overflow:auto}.segment-player:fullscreen video{flex:1 1 0;min-height:0;aspect-ratio:auto;object-fit:contain}.segment-player:fullscreen .player-controls{flex:0 0 auto}.fullscreen-status{margin:6px 0 0;font-size:14px;color:#9b3426}
+.portrait{height:160px;display:flex;justify-content:center;align-items:center;background:#e8eee8}.portrait img{height:100%;max-width:100%;object-fit:contain}.people-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.people-options button{padding:4px}.people-options .portrait{height:120px}.people-options span{display:block;font-size:13px}.priority-options{grid-template-columns:repeat(2,minmax(0,1fr))}.priority-options .portrait{height:190px}.person-group input{max-width:100%;box-sizing:border-box;font:inherit;padding:8px}.body select,.bar select{max-width:100%;padding:8px;font:inherit}.goal-transfer{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.goal-transfer span{width:100%;font-weight:600}.goal-transfer select{flex:1 1 130px}.goal-transfer button{padding:7px 9px}.group-merge{margin:14px 0 0}.group-merge summary{font-size:14px;margin-bottom:8px}.group-merge button{margin-left:6px}#player-step{margin-bottom:40px;padding-bottom:30px;border-bottom:2px solid #a9b8ad}#player-step .bar{margin-bottom:20px}.outdated #player-events,.outdated #player-groups,.outdated #player-merges{display:none}
+</style></head><body>
+<header><p id="screen-step" hidden>第 1 步 / 共 2 步</p><h1 id="screen-title" tabindex="-1">确认进球并生成集锦</h1><p id="source"></p></header>
+<main>
+<section id="goal-screen" aria-label="确认进球界面">
+<p>确认要保留的进球，然后生成原声集锦。</p>
+<div class="actions"><button id="add-goal">补一个漏掉的进球</button></div>
+<div class="bar"><span id="counter" aria-live="polite"></span><button id="next-players" class="primary" disabled hidden>下一步：匹配投篮人</button><button id="export" disabled>导出全部已选进球</button><button id="reset">恢复默认勾选</button></div>
+<p id="storage" role="status"></p><div id="result" class="result" aria-live="polite"></div><div class="links"><a id="montage" hidden download="basketball-highlights.mp4">下载集锦</a><a id="record" hidden download="selection.json">下载选择记录</a></div>
+<section><h2 id="pending-title">待确认</h2><p>选择“加入集锦”或“不保留”。这些选择不会修改算法的自动结果。</p><div class="grid" id="uncertain"></div></section>
+<details open><summary id="auto-title">自动计入</summary><p>已默认加入集锦，可以回看或移除。默认保留不代表你已经逐个确认。</p><div class="grid" id="supported"></div></details>
+<section id="manual-section" hidden><h2>手动补充</h2><div class="grid" id="manual-goals"></div></section>
+<dialog id="goal-editor" aria-labelledby="editor-title"><form id="goal-edit-form">
+<h2 id="editor-title">补充进球</h2><p>拖动原视频找到进球，填写时刻和要保留的片段范围。时间单位为秒。</p>
+<video id="editor-video" controls playsinline preload="none" aria-label="原视频定位"></video>
+<div class="edit-fields"><label>进球时刻 <input id="edit-time" type="number" min="0" step="0.01" required><button type="button" id="use-time">用当前画面</button></label>
+<label>片段开始 <input id="edit-start" type="number" min="0" step="0.01" required><button type="button" id="use-start">用当前画面</button></label>
+<label>片段结束 <input id="edit-end" type="number" min="0" step="0.01" required><button type="button" id="use-end">用当前画面</button></label></div>
+<p id="edit-error" role="alert"></p><div class="actions"><button type="submit" class="primary">保存片段</button><button type="button" id="cancel-edit">取消</button></div>
+</form></dialog>
+</section>
+<section id="player-screen" aria-label="人物核对界面" hidden>
+<button id="back-goals">返回进球复核</button>
+<p id="player-progress" role="status"></p><button id="retry-players" hidden>重新匹配投篮人</button>
+<section id="player-step" hidden><p>每个进球可单独改给另一位人物。只有确认两组是同一人时，才使用“合并整组”。</p><div id="player-message" class="empty" role="status"></div><div id="player-groups" class="grid"></div><div id="player-merges" class="bar"></div><div class="bar"><button id="save-players" class="primary">保存人物归属</button><button id="new-player">新建人物</button><label>选择人物 <select id="export-player" aria-label="选择导出人物"></select></label><button id="export-one" disabled>导出这位人物的集锦</button></div><div id="player-result" class="result" aria-live="polite"></div><div class="links"><a id="player-montage" hidden download="basketball-player-highlights.mp4">下载人物集锦</a><a id="player-record" hidden download="player-selection.json">下载人物选择记录</a></div><div id="player-events" class="grid"></div></section>
+</section>
+</main>
+<footer id="goal-footer">发现漏球时，可从原视频手动补充。导出使用原视频，保留原有声音。选择草稿保存在当前浏览器中。</footer>
+<footer id="player-footer" hidden>核对并保存人物归属后，选择一位人物生成集锦。需要增减进球时，点击“返回进球复核”。</footer>
+<noscript>请启用 JavaScript。</noscript><script>
+const DATA=/*REVIEW_DATA*/null;
+const PLAYERS_ENABLED=/*PLAYERS_ENABLED*/false;
+const candidates=DATA.manifest.candidates, key='stable-review:'+DATA.manifest_sha256;
+let choices={},busy=false,playerBusy=false,exportKind='all';
+const statusNodes=new Map(),buttons=new Map();
+const has=id=>Object.prototype.hasOwnProperty.call(choices,id);
+const state=c=>has(c.id)?(choices[c.id]?'keep':'reject'):c.initial_state;
+const stamp=t=>{const n=Math.round(t*100);return `${Math.floor(n/6000)}:${((n%6000)/100).toFixed(2).padStart(5,'0')}`};
+function segmentPlayer(video,c,label){
+ const segment=clipInterval(c),start=segment.start,end=segment.end,length=end-start;
+ const shell=document.createElement('div');shell.className='segment-player';shell.setAttribute('role','group');shell.setAttribute('aria-label',label+' 片段播放器');shell.append(video);
+ video.dataset.segmentStart=start;video.dataset.segmentEnd=end;video.dataset.eventTime=c.time_seconds;video.playsInline=true;video.preload='none';
+ const box=document.createElement('div');box.className='player-controls';const row=document.createElement('div');row.className='row';
+ const play=document.createElement('button');play.textContent='播放片段';play.setAttribute('aria-label',label+' 播放或暂停');
+ const range=document.createElement('input');range.type='range';range.min=0;range.max=length;range.step=.01;range.value=0;range.setAttribute('aria-label',label+' 片段进度');
+ const clock=document.createElement('span');clock.className='player-time';row.append(play,range,clock);box.append(row);
+ const note=document.createElement('p');note.className='segment-note';note.textContent=`原视频 ${stamp(start)} — ${stamp(end)}`;box.append(note);
+ const sound=document.createElement('button');sound.textContent='静音';sound.setAttribute('aria-label',label+' 切换声音');
+ const jump=document.createElement('button');jump.textContent='跳到投篮时刻';jump.setAttribute('aria-label',label+' 跳到投篮时刻');
+ const full=document.createElement('button');full.textContent='全屏';full.setAttribute('aria-label',label+' 全屏');full.setAttribute('aria-pressed','false');const extras=document.createElement('div');extras.className='row secondary';extras.append(sound,jump,full);box.append(extras);
+ const fullscreenStatus=document.createElement('p');fullscreenStatus.className='fullscreen-status';fullscreenStatus.setAttribute('role','status');fullscreenStatus.hidden=true;box.append(fullscreenStatus);shell.append(box);
+ let target=start,timer=null,frameCallback=null;
+ function paint(){const time=video.readyState?Math.max(0,Math.min(length,video.currentTime-start)):target-start;range.value=time;clock.textContent=`${time.toFixed(1)} / ${length.toFixed(1)} 秒`;play.textContent=video.paused?(time>=length-.02?'重播片段':'播放片段'):'暂停';}
+ function seek(time){target=Math.max(start,Math.min(end,time));if(!video.getAttribute('src')){video.preload='metadata';video.src=DATA.preview.url+`#t=${start},${end}`;video.load();}if(video.readyState)video.currentTime=target;paint();}
+ function stop(){video.pause();target=end;if(Math.abs(video.currentTime-end)>.002)video.currentTime=end;paint();}
+ function boundary(){if(!video.paused&&video.currentTime>=end-.002)stop();}
+ function monitor(){boundary();if(!video.paused&&video.requestVideoFrameCallback)frameCallback=video.requestVideoFrameCallback(monitor);}
+ async function toggle(){if(!video.paused){video.pause();return;}if(!video.getAttribute('src')||video.currentTime<start||video.currentTime>=end-.02)seek(start);try{await video.play();}catch(e){note.textContent='暂时无法播放，请刷新页面后重试。';note.classList.add('playback-error');}}
+ video.addEventListener('loadedmetadata',()=>{video.currentTime=target;paint();});
+ video.addEventListener('seeking',()=>{if(video.currentTime<start-.002||video.currentTime>end+.002)seek(Math.max(start,Math.min(end,video.currentTime)));});
+ video.addEventListener('timeupdate',()=>{boundary();paint();});video.addEventListener('seeked',paint);
+ video.addEventListener('play',()=>{clearInterval(timer);timer=setInterval(boundary,40);monitor();paint();});
+ video.addEventListener('pause',()=>{clearInterval(timer);if(frameCallback!=null&&video.cancelVideoFrameCallback)video.cancelVideoFrameCallback(frameCallback);frameCallback=null;paint();});
+ video.addEventListener('ended',()=>{clearInterval(timer);paint();});
+ video.addEventListener('error',()=>{note.textContent='暂时无法播放，请刷新页面后重试。';note.classList.add('playback-error');});
+ play.addEventListener('click',toggle);video.addEventListener('click',toggle);range.addEventListener('input',()=>{seek(start+Number(range.value));if(target>=end)video.pause();});
+ sound.addEventListener('click',()=>{video.muted=!video.muted;sound.textContent=video.muted?'开启声音':'静音';});
+ jump.addEventListener('click',()=>seek(c.time_seconds));
+ let wasFullscreen=false;
+ const fullscreenChanged=()=>{const active=document.fullscreenElement===shell;full.textContent=active?'退出全屏':'全屏';full.setAttribute('aria-label',label+(active?' 退出全屏':' 全屏'));full.setAttribute('aria-pressed',String(active));if(wasFullscreen&&!active)full.focus({preventScroll:true});wasFullscreen=active;};document.addEventListener('fullscreenchange',fullscreenChanged);
+ full.addEventListener('click',async()=>{fullscreenStatus.hidden=true;try{if(document.fullscreenElement===shell){await document.exitFullscreen();}else if(shell.requestFullscreen&&document.fullscreenEnabled!==false){await shell.requestFullscreen();}else{fullscreenStatus.textContent='此浏览器不支持片段播放器全屏，请在当前卡片中播放。';fullscreenStatus.hidden=false;}}catch(e){fullscreenStatus.textContent='无法进入或退出全屏，请重试或在当前卡片中播放。';fullscreenStatus.hidden=false;}});
+ seek(start);return {element:shell,seek,destroy(){video.pause();clearInterval(timer);if(frameCallback!=null&&video.cancelVideoFrameCallback)video.cancelVideoFrameCallback(frameCallback);document.removeEventListener('fullscreenchange',fullscreenChanged);video.removeAttribute('src');video.load();}};
+}
+/*GOAL_EDIT_SCRIPT*/
+function persist(){try{localStorage.setItem(key,JSON.stringify({choices,manual_events:manualEvents,segment_overrides:rangeOverrides}));}catch(e){document.getElementById('storage').textContent='浏览器无法保存草稿，关闭页面会丢失未导出的选择。';}}
+try{const saved=JSON.parse(localStorage.getItem(key)||'{}'),old=saved?.choices||saved;if(old&&typeof old==='object'&&!Array.isArray(old)&&Object.entries(old).every(([id,v])=>candidates.some(c=>c.id===id)&&typeof v==='boolean')){choices=old;restoreEdits(saved);}}catch(e){document.getElementById('storage').textContent='无法恢复草稿，已使用默认选择。';}
+function invalidate(){document.getElementById('montage').hidden=true;document.getElementById('record').hidden=true;document.getElementById('result').textContent='选择已更改，生成集锦后可下载本次结果。';if(typeof checkPlayerSelection==='function')checkPlayerSelection();}
+function update(){
+ const pending=candidates.filter(c=>state(c)==='pending').length,selected=candidates.filter(c=>state(c)==='keep').length+manualEvents.length;
+ document.getElementById('counter').textContent=`自动计入 ${candidates.filter(c=>c.category==='supported').length} · 剩余待确认 ${pending} · 当前选入 ${selected}`;
+ document.getElementById('export').disabled=busy||playerBusy||pending>0;document.getElementById('reset').disabled=busy||playerBusy;
+ document.getElementById('next-players').disabled=busy||playerBusy||pending>0||selected===0;
+ document.getElementById('next-players').hidden=!PLAYERS_ENABLED;
+ document.getElementById('retry-players').disabled=busy||playerBusy||pending>0||selected===0;
+ document.querySelectorAll('[data-edit-control]').forEach(b=>b.disabled=busy||playerBusy);
+ document.getElementById('add-goal').disabled=busy||playerBusy||DATA.preview?.mode!=='source_segments';
+ for(const c of candidates){const s=state(c);statusNodes.get(c.id).textContent=s==='pending'?'尚未确认':s==='keep'?(has(c.id)?'已选择加入':'自动计入 · 默认保留'):(has(c.id)?'已选择不保留':'默认不加入');buttons.get(c.id).forEach((b,i)=>{b.disabled=busy||playerBusy;b.classList.toggle('active',has(c.id)&&choices[c.id]===(i===0));});}
+ if(typeof updatePlayerExport==='function')updatePlayerExport();
+}
+document.getElementById('source').textContent=DATA.manifest.source.path.split(/[\\/]/).pop();
+for(const [kind,titleId,label] of [['uncertain','pending-title','待确认'],['supported','auto-title','自动计入']]){
+ const group=candidates.filter(c=>c.category===kind);document.getElementById(titleId).textContent=`${label}（${group.length}）`;
+ if(!group.length){const p=document.createElement('p');p.className='empty';p.textContent=kind==='uncertain'?'没有待确认项，可以直接生成集锦。':'没有此类片段。';document.getElementById(kind).append(p);}
+ group.forEach((c,i)=>{const card=document.createElement('article');card.className='card';const video=document.createElement('video');video.setAttribute('aria-label',`${label} ${i+1} 视频`);video.addEventListener('play',()=>document.querySelectorAll('video').forEach(v=>{if(v!==video)v.pause()}));
+ let player=DATA.preview?.mode==='source_segments'?segmentPlayer(video,c,`${label} ${i+1}`):null;if(player)card.append(player.element);else{video.src=c.clip;video.controls=true;video.preload='metadata';card.append(video);}
+ const body=document.createElement('div');body.className='body';const h=document.createElement('h3');h.textContent=`${label} ${i+1} · ${stamp(c.time_seconds)}`;body.append(h);
+ const s=document.createElement('div');s.className='status';statusNodes.set(c.id,s);body.append(s);
+ if(!player){const seek=document.createElement('button');seek.textContent='跳到投篮时刻';seek.setAttribute('aria-label',`${label} ${i+1} 跳到投篮时刻`);seek.addEventListener('click',()=>video.currentTime=c.time_seconds-c.clip_start_seconds);body.append(seek);}
+ const actions=document.createElement('div');actions.className='actions';const controls=[];
+ for(const [keep,text] of [[true,'加入集锦'],[false,'不保留']]){const b=document.createElement('button');b.textContent=text;b.setAttribute('aria-label',`${label} ${i+1} ${text}`);b.addEventListener('click',()=>{choices[c.id]=keep;persist();invalidate();update()});actions.append(b);controls.push(b);}buttons.set(c.id,controls);body.append(actions);card.append(body);document.getElementById(kind).append(card);
+ if(player){actions.append(editButton('调整片段范围',()=>openEditor(c,()=>{const old=player;old.destroy();player=segmentPlayer(document.createElement('video'),c,`${label} ${i+1}`);old.element.replaceWith(player.element);})));}
+ });
+}
+renderManual();
+document.getElementById('reset').addEventListener('click',()=>{choices={};persist();invalidate();update();});
+const selection=()=>({version:'stable-selection-v2',review_manifest_sha256:DATA.manifest_sha256,choices:{...choices},manual_events:manualEvents.map(e=>({...e})),segment_overrides:{...rangeOverrides}});
+const signature=obj=>JSON.stringify(Object.entries(obj||{}).sort(([a],[b])=>a.localeCompare(b)));
+const selectionSignature=s=>JSON.stringify([signature(s?.choices),s?.manual_events||[],Object.entries(s?.segment_overrides||{}).sort(([a],[b])=>a.localeCompare(b))]);
+async function poll(){try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('无法读取状态');const s=await r.json();busy=s.status==='running';update();
+ exportKind=s.kind==='player'?'player':'all';
+ const result=document.getElementById(s.kind==='player'?'player-result':'result');if(busy){result.textContent='正在生成集锦，请稍候…';setTimeout(poll,800);return;}
+ if(s.status==='failed'){result.textContent='导出失败，可以重试。'+(s.error||'');return;}
+ if(s.status==='completed'){
+  if(s.kind==='player'&&!PLAYERS_ENABLED)return;
+  if(s.kind==='player'){playerExportStatus=s;renderPlayerExport();return;}
+  playerExportStatus=null;
+  if(selectionSignature(s.selection)!==selectionSignature(selection())){result.textContent='已有一次导出，但当前选择不同。请重新生成集锦。';return;}
+  result.textContent=s.selected_count?`已生成 ${s.selected_count} 段集锦。`:'没有选入片段，已保存选择记录。';if(s.selection_actor==='integration_test')result.textContent+=' 本次是模拟流程验证。';
+  if(s.montage_url){const a=document.getElementById('montage');a.href=s.montage_url;a.hidden=false;}const a=document.getElementById('record');a.href=s.selection_url;a.hidden=false;
+ }
+ }catch(e){busy=false;update();document.getElementById(exportKind==='player'?'player-result':'result').textContent='本地服务连接失败。请检查服务后刷新页面；选择草稿已保留。';}}
+document.getElementById('export').addEventListener('click',async()=>{if(candidates.some(c=>state(c)==='pending'))return;busy=true;update();invalidate();document.getElementById('result').textContent='正在提交导出…';try{const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(selection())});const s=await r.json();if(!r.ok&&r.status!==409)throw Error(s.error||'导出请求失败');poll();}catch(e){busy=false;update();document.getElementById('result').textContent=e.message;}});
+/*PLAYER_SCRIPT*/
+showReviewScreen(location.hash==='#players'||location.hash==='#player-step'?'players':'goals',false);
+update();poll();if(PLAYERS_ENABLED)pollPlayers();
+</script></body></html>

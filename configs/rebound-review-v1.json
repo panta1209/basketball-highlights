@@ -1,0 +1,16 @@
+{
+  "version": "rebound-review-v1",
+  "minimum_confidence": 0.4,
+  "maximum_link_gap_seconds": 0.4,
+  "maximum_link_hoop_widths": 2.0,
+  "maximum_size_ratio": 1.5,
+  "maximum_observation_gap_seconds": 0.12,
+  "followup_seconds": 1.0,
+  "minimum_arc_seconds": 0.3,
+  "minimum_strong_observations": 5,
+  "minimum_rise_ball_heights": 1.0,
+  "minimum_observed_rise_ball_heights": 0.15,
+  "minimum_fall_ball_heights": 1.0,
+  "outside_clearance_hoop_widths": 1.0,
+  "jitter_ball_dimensions": 0.25
+}

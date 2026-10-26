@@ -1,0 +1,18 @@
+{
+  "version": "automatic-v1",
+  "scout_seconds": 20.0,
+  "scout_interval_seconds": 1.0,
+  "scout_confidence": 0.3,
+  "stable_support_fraction": 0.5,
+  "stable_min_observations": 3,
+  "cluster_iou": 0.4,
+  "max_center_jitter_fraction": 0.15,
+  "roi_side_margin_widths": 3.0,
+  "roi_above_margin_heights": 3.0,
+  "roi_below_margin_heights": 2.0,
+  "imgsz": 960,
+  "inference_confidence": 0.2,
+  "track_ttl_seconds": 0.6666666666666666,
+  "history_seconds": 1.0,
+  "merge_iou": 0.5
+}

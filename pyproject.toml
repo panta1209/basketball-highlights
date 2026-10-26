@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basketball-goal-poc"
+version = "0.1.0"
+description = "Local fixed-camera basketball goal detection experiments"
+requires-python = ">=3.11"
+dependencies = ["ultralytics>=8.3,<9", "opencv-python>=4.10,<5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+download = ["yt-dlp>=2026.8.19"]
+benchmark = ["dill==0.4.1"]
+relation = ["onnxruntime==1.30.0"]
+rim-probe = ["onnx==1.23.2", "onnxruntime==1.30.0"]
+mobile = ["onnx==1.23.2", "onnxruntime==1.30.0"]
+
+[project.scripts]
+basketball = "basketball_poc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+basketball_poc = ["review.html", "stable_review.html", "upload_portal.html", "player_review.js", "goal_review_edit.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

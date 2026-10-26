@@ -1,0 +1,11 @@
+{
+  "roi": [500, 100, 1100, 700],
+  "rim": [740, 310, 820, 330],
+  "ball_class": 0,
+  "confidence": 0.2,
+  "imgsz": 960,
+  "max_gap_seconds": 0.15,
+  "max_speed_rim_widths_per_second": 30.0,
+  "confirm_seconds": 0.4,
+  "cooldown_seconds": 0.75
+}

@@ -1,0 +1,8 @@
+{
+  "version": "review-triage-v1",
+  "exclude_premature_projection": true,
+  "exclude_observed_lateral_exit": true,
+  "minimum_observation_confidence": 0.4,
+  "maximum_observation_gap_seconds": 0.25,
+  "followup_seconds": 0.8
+}

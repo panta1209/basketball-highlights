@@ -1,0 +1,31 @@
+{
+  "version": "public-rim-probe-v1",
+  "imgsz": 640,
+  "confidence": 0.2,
+  "iou": 0.5,
+  "max_det": 300,
+  "rect": false,
+  "device": "cpu",
+  "torch_threads": 4,
+  "uniform_step_seconds": 5.0,
+  "window_offsets_seconds": [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3],
+  "known_failure_diagnostics": {
+    "moving-roi-v1-first3m-01": [145.05]
+  },
+  "models": [
+    {
+      "id": "mterry",
+      "path": "models/MTerryJack--Element-Detect-Basketball-5d665552fd69a9265eb8aac4b91533d38e0e19fa/weights.onnx",
+      "sha256": "6235ebc073546ca796790e85ccf78c5ab9b4789c396834a8b9a94a90e7fef491",
+      "names": {"0": "ball", "1": "human", "2": "rim"},
+      "rim_class_id": 2
+    },
+    {
+      "id": "statslane",
+      "path": "models/Statslane--ball_hoop_model-5543c1f69367d8f3f6b0d01b6abda17add2b5b93/ball_hoop.pt",
+      "sha256": "0564357a890efdca0346196a792be266002c0b7975f244fd9b0ecd426cff71ba",
+      "names": {"0": "ball", "1": "hoop"},
+      "rim_class_id": 1
+    }
+  ]
+}

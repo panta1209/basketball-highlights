@@ -1,0 +1,8 @@
+{
+  "version": "moving-roi-v1",
+  "ball_imgsz": 960,
+  "ball_inference_confidence": 0.2,
+  "horizontal_hoop_widths": 3.5,
+  "vertical_hoop_widths": 6.0,
+  "merge_iou": 0.5
+}

@@ -1,0 +1,20 @@
+{
+  "version": "moving-v1",
+  "imgsz": 640,
+  "inference_confidence": 0.2,
+  "hoop_confidence": 0.3,
+  "ball_confidence": 0.4,
+  "track_ttl_seconds": 0.6666666666666666,
+  "history_seconds": 1.0,
+  "hoop_match_diagonals": 1.0,
+  "max_hoop_scale_ratio": 2.0,
+  "ball_match_diagonals": 4.0,
+  "cooldown_seconds": 0.75,
+  "registration_long_side": 480,
+  "registration_features": 1000,
+  "registration_ratio": 0.75,
+  "registration_min_matches": 16,
+  "registration_min_inliers": 12,
+  "registration_min_inlier_fraction": 0.5,
+  "registration_ransac_pixels": 3.0
+}

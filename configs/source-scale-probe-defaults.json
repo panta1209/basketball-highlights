@@ -1,0 +1,25 @@
+{
+  "version": "source-scale-probe-v1",
+  "model": "third_party/josephattalla/e320817d0f87eceb4093c871de6d29d1adca0006/bball_model.pt",
+  "model_sha256": "40f3e596652a427ba290b3f72384e49aed12caf1a8ae41beaef4a8fffcf09fa3",
+  "full_control_imgsz": 640,
+  "full_large_imgsz": 1280,
+  "tile_imgsz": 960,
+  "tile_fraction": 0.6,
+  "confidence": 0.2,
+  "iou": 0.7,
+  "max_det": 300,
+  "rect": true,
+  "merge_iou": 0.5,
+  "torch_threads": 4,
+  "uniform_step_seconds": 5.0,
+  "window_offsets_seconds": [-0.3,-0.2,-0.1,0,0.1,0.2,0.3],
+  "known_failure_diagnostics": {
+    "moving-roi-v1-first3m-01": [145.05],
+    "fullcourt-moving-01-01": [4.2],
+    "fullcourt-moving-02-01": [4.0],
+    "fullcourt-moving-03-01": [2.5],
+    "fullcourt-match-workflow-01/analysis": [20.0,38.0,49.0,56.5]
+  },
+  "runs": ["moving-roi-v1-user-video-01","moving-roi-v1-first3m-01","moving-roi-v1-next3m-01","fullcourt-moving-01-01","fullcourt-moving-02-01","fullcourt-moving-03-01","fullcourt-match-workflow-01/analysis"]
+}

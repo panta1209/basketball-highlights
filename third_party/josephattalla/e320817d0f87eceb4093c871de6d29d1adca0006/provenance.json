@@ -1,0 +1,48 @@
+{
+  "repository": "josephattalla/Basketball-Shot-Detection",
+  "commit": "e320817d0f87eceb4093c871de6d29d1adca0006",
+  "files": [
+    {
+      "file": "README.md",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/README.md",
+      "sha256": "64122afceb2b7a8c4fd2e1ae4392e9e6b437bd8800ecb53521e91980ff7bfff8",
+      "size_bytes": 4975
+    },
+    {
+      "file": "LICENSE",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/LICENSE",
+      "sha256": "466d916f896f9ffb2d8a1a5b376a0172381f46a80070225410a0d3c81f660029",
+      "size_bytes": 1073
+    },
+    {
+      "file": "DetectedBall.py",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/DetectedBall.py",
+      "sha256": "1be3b22b287d4b7b60e17baf38563e198ed9b6ca64cf6f38c8ba271a6afa40b7",
+      "size_bytes": 719
+    },
+    {
+      "file": "DetectedObject.py",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/DetectedObject.py",
+      "sha256": "3f4c0d8a450078b39fabdcaed15629c829a00a927455f7c65b87deb1474867cd",
+      "size_bytes": 468
+    },
+    {
+      "file": "utils.py",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/utils.py",
+      "sha256": "74e34cb89f93ad73b4ded96da36b6378b1c0899424e6b4b0102e3f69ded82b29",
+      "size_bytes": 413
+    },
+    {
+      "file": "shot_detector.py",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/shot_detector.py",
+      "sha256": "a5b908f488fd8327d920b0f73bdac1b171a7ba726b4d7c00d40f5fec801ce8b3",
+      "size_bytes": 14893
+    },
+    {
+      "file": "bball_model.pt",
+      "url": "https://raw.githubusercontent.com/josephattalla/Basketball-Shot-Detection/e320817d0f87eceb4093c871de6d29d1adca0006/bball_model.pt",
+      "sha256": "40f3e596652a427ba290b3f72384e49aed12caf1a8ae41beaef4a8fffcf09fa3",
+      "size_bytes": 6251993
+    }
+  ]
+}

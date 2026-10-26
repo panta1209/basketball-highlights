@@ -1,0 +1,11 @@
+{
+  "version": "hoop-observation-grouping-v1",
+  "duplicate_iou": 0.5,
+  "ambiguity_mean_cost_gap": 0.05,
+  "shared_top_max_width_ratio": 1.25,
+  "shared_top_max_offset_widths": 0.125,
+  "shared_center_max_offset_widths": 0.125,
+  "shared_min_containment": 0.9,
+  "grouping": "confidence ordered complete link; original highest confidence representative",
+  "default_enabled": false
+}

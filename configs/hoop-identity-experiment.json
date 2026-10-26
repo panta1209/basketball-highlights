@@ -1,0 +1,7 @@
+{
+  "version": "global-hoop-identity-v1",
+  "duplicate_iou": 0.5,
+  "ambiguity_mean_cost_gap": 0.05,
+  "cost": "equal mean of normalized distance, log scale and one minus IoU",
+  "default_enabled": false
+}

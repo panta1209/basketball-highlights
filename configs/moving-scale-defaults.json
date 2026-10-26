@@ -1,0 +1,10 @@
+{
+  "version": "moving-scale-v1",
+  "full_frame_imgsz": 1280,
+  "full_frame_confidence": 0.2,
+  "iou": 0.7,
+  "max_det": 300,
+  "rect": true,
+  "merge_iou": 0.5,
+  "torch_threads": 4
+}

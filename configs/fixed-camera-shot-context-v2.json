@@ -1,0 +1,13 @@
+{
+  "version": "shot-context-v2",
+  "strong_confidence": 0.4,
+  "weak_confidence": 0.2,
+  "maximum_size_ratio": 2.0,
+  "association_ball_diagonals": 2.0,
+  "bootstrap_max_gap_seconds": 0.25,
+  "bootstrap_speed_hoop_widths_per_second": 16.0,
+  "prediction_acceleration_hoop_widths_per_second_squared": 10.0,
+  "motion_min_ball_diagonals": 0.25,
+  "recovery_max_delay_ttl_fraction": 0.5,
+  "recovery_above_hoop_heights": 1.5
+}
