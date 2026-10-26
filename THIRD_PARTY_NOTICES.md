@@ -72,3 +72,7 @@ Python 3.12.14 运行时保留 PSF 许可证（runtime/LICENSE.txt）。纯 Pyth
 - 模型: https://github.com/josephattalla/Basketball-Shot-Detection/tree/e320817d0f87eceb4093c871de6d29d1adca0006
 
 下载源码文件的精确 URL 和 SHA-256 见 licenses/sources/sources.json。模型 SHA-256 见 third_party/josephattalla/e320817d0f87eceb4093c871de6d29d1adca0006/provenance.json。私人视频、标注、浏览器草稿、用户路径和任务日志不包含在公开源码或发行包中。
+
+## Microsoft 系统运行组件
+
+需要 Microsoft Visual C++ v14.51 或更新的 x64 运行组件。缺少时，启动器由用户点击后从微软官方取得 14.51.36247.0 安装器，再由 Windows 和微软安装程序完成授权与安装。额外运行库和该安装器未包含在本项目发行包内。固定下载地址和 SHA-256 保存在 Launcher.cs；微软条款：https://aka.ms/VCRedistLicense 。Python 独立发行原带文件保持其原许可与版权声明。

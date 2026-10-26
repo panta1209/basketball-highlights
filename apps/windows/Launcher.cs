@@ -5,6 +5,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Net;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 // A job object closes the local engine and its children when this app exits.
@@ -17,21 +20,57 @@ sealed class Launcher : Form {
     [StructLayout(LayoutKind.Sequential)] struct IoCounters { public ulong a,b,c,d,e,f; }
     [StructLayout(LayoutKind.Sequential)] struct ExtendedLimits { public BasicLimits basic; public IoCounters io; public UIntPtr a,b,c,d; }
     Process engine; IntPtr job; string url, ready, data; bool opened;
+    bool needsRuntime;
+    const string RuntimeUrl="https://download.visualstudio.microsoft.com/download/pr/ebdab8e5-1d7b-4d9f-a11b-cbb1720c3b12/843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C/VC_redist.x64.exe";
+    const string RuntimeSha="843068991daaa1f73ad9f6239bce4d0f6a07a51f18c37ea2a867e9beca71295c";
     Label status = new Label(); Button open = new Button(); System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
     readonly bool noBrowser=Array.IndexOf(Environment.GetCommandLineArgs(),"--no-browser")>=0;
     static string Quote(string s) { return "\"" + s + "\""; }
     Launcher() {
-        Text="篮球集锦 · 本地预览版"; ClientSize=new Size(490,240); FormBorderStyle=FormBorderStyle.FixedDialog;
+        Text="篮球集锦 · 本地预览版"; ClientSize=new Size(490,275); FormBorderStyle=FormBorderStyle.FixedDialog;
         MaximizeBox=false; StartPosition=FormStartPosition.CenterScreen; Font=new Font("Microsoft YaHei UI",10);
         status.SetBounds(24,22,440,70); status.Text="正在启动，请稍候…"; Controls.Add(status);
-        open.Text="打开软件界面"; open.SetBounds(24,102,200,40); open.Enabled=false; open.Click+=(s,e)=>Open(); Controls.Add(open);
+        open.Text="打开软件界面"; open.SetBounds(24,102,200,40); open.Enabled=false; open.Click+=(s,e)=>{if(needsRuntime)PrepareRuntime();else Open();}; Controls.Add(open);
         Button folder=new Button(); folder.Text="打开本机任务文件夹"; folder.SetBounds(238,102,225,40); Controls.Add(folder);
         string[] args=Environment.GetCommandLineArgs(); int dataArg=Array.IndexOf(args,"--data-dir");
         data=dataArg>=0&&dataArg+1<args.Length?Path.GetFullPath(args[dataArg+1]):Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"BasketballHighlights"); Directory.CreateDirectory(data);
         folder.Click+=(s,e)=>Process.Start(new ProcessStartInfo(data){UseShellExecute=true});
         Label note=new Label(); note.SetBounds(24,160,440,60); note.Text="视频和识别均在本机处理。\n处理期间请保留此窗口，关闭它会停止正在运行的任务。"; Controls.Add(note);
-        Shown+=(s,e)=>StartEngine(); FormClosing+=OnClosingApp;
+        LinkLabel terms=new LinkLabel();terms.Text="微软运行组件使用条款";terms.SetBounds(24,230,440,25);terms.LinkClicked+=(s,e)=>Process.Start(new ProcessStartInfo("https://aka.ms/VCRedistLicense"){UseShellExecute=true});Controls.Add(terms);
+        Shown+=(s,e)=>{
+            needsRuntime=Array.IndexOf(Environment.GetCommandLineArgs(),"--runtime-setup")>=0||!HasRuntime();
+            terms.Visible=needsRuntime;
+            if(needsRuntime){status.Text="首次使用需要准备微软运行组件。\n需联网从微软官方下载；视频不会上传。\n安装完成后即可断网处理视频。";open.Text="安装微软运行组件";open.Enabled=true;}
+            else StartEngine();
+        }; FormClosing+=OnClosingApp;
         timer.Interval=300; timer.Tick+=(s,e)=>Check();
+    }
+    static bool HasRuntime(){
+        foreach(string name in new[]{"msvcp140.dll","vcruntime140_threads.dll"}){
+            string path=Path.Combine(Environment.SystemDirectory,name);if(!File.Exists(path))return false;
+            FileVersionInfo v=FileVersionInfo.GetVersionInfo(path);if(v.FileMajorPart<14||(v.FileMajorPart==14&&v.FileMinorPart<51))return false;
+        }return true;
+    }
+    static bool CorrectRuntime(string path){
+        if(!File.Exists(path))return false;
+        using(FileStream file=File.OpenRead(path))using(SHA256 hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(file)).Replace("-","").ToLowerInvariant()==RuntimeSha;
+    }
+    void PrepareRuntime(){
+        open.Enabled=false;status.Text="正在准备微软官方组件，请稍候…\nWindows 随后会询问是否允许安装。";
+        Task.Factory.StartNew(()=>{
+            try{
+                string folder=Path.Combine(data,"runtime");Directory.CreateDirectory(folder);string installer=Path.Combine(folder,"VC_redist.x64.exe");
+                if(!CorrectRuntime(installer)){
+                    string temporary=installer+".download";ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
+                    using(WebClient client=new WebClient())client.DownloadFile(RuntimeUrl,temporary);
+                    if(!CorrectRuntime(temporary))throw new Exception("组件校验失败，请重试。");
+                    if(File.Exists(installer))File.Delete(installer);File.Move(temporary,installer);
+                }
+                using(Process process=Process.Start(new ProcessStartInfo(installer,"/install /passive /norestart"){UseShellExecute=true})){process.WaitForExit();}
+                if(!HasRuntime())throw new Exception("组件尚未安装完成。请完成微软安装界面后重试。");
+                if(!IsDisposed)BeginInvoke(new Action(()=>{needsRuntime=false;open.Text="打开软件界面";status.Text="运行组件已准备完成，正在启动…";StartEngine();}));
+            }catch(Exception error){if(!IsDisposed)BeginInvoke(new Action(()=>{status.Text="准备未完成："+error.Message+"\n请检查网络后重试，也可先安装微软官方运行组件。";open.Enabled=true;}));}
+        });
     }
     void StartEngine() {
         try {
